@@ -13,4 +13,13 @@ async function readTalkerDataBase() {
   }
 }
 
-module.exports = readTalkerDataBase;
+async function readTalkerFromID(id) {
+    const talkers = await readTalkerDataBase();
+    const talkerFromID = talkers.find((talker) => talker.id === id);
+    return talkerFromID;
+}
+
+module.exports = {
+  readTalkerDataBase,
+  readTalkerFromID,
+};
