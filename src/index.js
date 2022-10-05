@@ -6,7 +6,8 @@ const app = express();
 app.use(bodyParser.json());
 
 const HTTP_OK_STATUS = 200;
-const HTTP_ERROR_STATUS = 404;
+const HTTP_ERROR_400 = 400;
+const HTTP_ERROR_404 = 404;
 const PORT = '3000';
 
 const generateToken = () => {
@@ -20,6 +21,32 @@ const generateToken = () => {
   return token;
 };
 
+const validateEmail = (request, response, next) => {
+  const { email } = request.body;
+  const FORMAT_EMAIL = /\S+@\S+\.\S+/;
+  const validEmail = FORMAT_EMAIL.test(email);
+  if (!email) { 
+    return response.status(HTTP_ERROR_400).json({ message: 'O campo "email" é obrigatório' });
+  } 
+  if (!validEmail) {
+    return response.status(HTTP_ERROR_400)
+    .json({ message: 'O "email" deve ter o formato "email@email.com"' });
+  }
+  next();
+};
+
+const validatePassword = (request, response, next) => {
+  const { password } = request.body;
+  if (!password) {
+    return response.status(HTTP_ERROR_400).json({ message: 'O campo "password" é obrigatório' });
+  } 
+  if (password.length < 6) {
+    return response.status(HTTP_ERROR_400)
+    .json({ message: 'O "password" deve ter pelo menos 6 caracteres' });
+  }
+  next();
+};
+
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/talker', async (request, response) => {
   const talkers = await readTalkerDataBase();
@@ -30,13 +57,12 @@ app.get('/talker/:id', async (request, response) => {
   const { id } = request.params;
   const talkerFromID = await readTalkerFromID(Number(id));
   if (talkerFromID) { return response.status(HTTP_OK_STATUS).json(talkerFromID); } 
-  return response.status(HTTP_ERROR_STATUS).json({ message: 'Pessoa palestrante não encontrada' });
+  return response.status(HTTP_ERROR_404).json({ message: 'Pessoa palestrante não encontrada' });
 });
 
-app.post('/login', (request, response) => {
-  const { email, password } = request.body;
+app.post('/login', validateEmail, validatePassword, (request, response) => {
   const token = generateToken();
-  if (email && password) { return response.status(HTTP_OK_STATUS).json({ token }); }
+  return response.status(HTTP_OK_STATUS).json({ token }); 
 });
 
 app.listen(PORT, () => {
