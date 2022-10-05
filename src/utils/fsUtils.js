@@ -14,9 +14,9 @@ async function readTalkerDataBase() {
 }
 
 async function readTalkerFromID(id) {
-    const talkers = await readTalkerDataBase();
-    const talkerFromID = talkers.find((talker) => talker.id === id);
-    return talkerFromID;
+  const talkers = await readTalkerDataBase();
+  const talkerFromID = talkers.find((talker) => talker.id === id);
+  return talkerFromID;
 }
 
 module.exports = {
