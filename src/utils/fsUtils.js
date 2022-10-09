@@ -47,9 +47,22 @@ async function updateTalkerFromID(id, updatedTalkerData) {
   }
 }
 
+async function deleteTalkerFromID(id) {
+  const oldTalkers = await readTalkerDataBase();
+  const updatedTalkers = oldTalkers.filter((talker) => talker.id !== id);
+  const refreshedTalkers = JSON.stringify(updatedTalkers);
+  try {
+    await fs.writeFile(path.resolve(__dirname, TALKER_PATH), refreshedTalkers);
+    // return updatedTalker;
+  } catch (error) {
+    console.error(`Erro na remoção dos dados: ${error}`);
+  }
+}
+
 module.exports = {
   readTalkerDataBase,
   readTalkerFromID,
   writeNewTalker,
   updateTalkerFromID,
+  deleteTalkerFromID,
 };
