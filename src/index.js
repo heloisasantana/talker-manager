@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { readTalkerDataBase, readTalkerFromID, writeNewTalker } = require('./utils/fsUtils.js');
+const { readTalkerDataBase, readTalkerFromID, writeNewTalker,
+  updateTalkerFromID } = require('./utils/fsUtils.js');
 
 const app = express();
 app.use(bodyParser.json());
@@ -108,7 +109,7 @@ const validateWatchedAt = (request, response, next) => {
 
 const validateRate = (request, response, next) => {
   const { talk: { rate } } = request.body;
-  if (!rate) {
+  if (rate === undefined) {
     return response.status(HTTP_ERROR_400).json({ message: 'O campo "rate" é obrigatório' });
   }
   if (Number(rate) < 1 || Number(rate) > 5) {
@@ -141,6 +142,14 @@ validateRate, async (request, response) => {
   const newTalker = request.body;
   const newTalkerWithId = await writeNewTalker(newTalker);
   return response.status(HTTP_CREATE_201).json(newTalkerWithId); 
+});
+
+app.put('/talker/:id', validateToken, validateName, validateAge, validateTalk, validateWatchedAt,
+validateRate, async (request, response) => {
+  const { id } = request.params;
+  const updatedTalkerData = request.body;
+  const updatedTalker = await updateTalkerFromID(Number(id), updatedTalkerData);
+  return response.status(HTTP_OK_STATUS).json(updatedTalker); 
 });
 
 app.listen(PORT, () => {
