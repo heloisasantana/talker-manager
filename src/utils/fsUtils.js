@@ -19,7 +19,20 @@ async function readTalkerFromID(id) {
   return talkerFromID;
 }
 
+async function writeNewTalker(newTalker) {
+  try {
+    const oldTalkers = await readTalkerDataBase();
+    const newTalkerWithId = { id: oldTalkers.length + 1, ...newTalker };
+    const allTakers = JSON.stringify([...oldTalkers, newTalkerWithId]);
+    await fs.writeFile(path.resolve(__dirname, TALKER_PATH), allTakers);
+    return newTalkerWithId;
+  } catch (error) {
+    console.error(`Erro na escrita dos dados: ${error}`);
+  }
+}
+
 module.exports = {
   readTalkerDataBase,
   readTalkerFromID,
+  writeNewTalker,
 };
